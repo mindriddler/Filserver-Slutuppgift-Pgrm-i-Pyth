@@ -23,16 +23,18 @@ class Client(threading.Thread):
                              self.sock,
                              self.stop,
                              self.threads,
+                             self.username,
                          )).start()
         while not self.stop.is_set():
             self.recieve_data(self.sock, self.stop)
 
-    def menu(self, sock, stop, threads):
+    def menu(self, sock, stop, threads, username):
         threads.append(self.name)
         while not stop.is_set():
             try:
-                input("Press any key to continue to main menu")
-                command = input("\n   COMMAND       | DESCRIPTION\n\n"
+                time.sleep(0.01)
+                command = input(f"\n{username}\n"
+                                "\n   COMMAND       | DESCRIPTION\n\n"
                                 "rm   <FILE_NAME> | Removes a file\n"
                                 "dwnl <FILE_NAME> | Upload a file\n"
                                 "upld <FILE_PATH> | Download a file\n"
@@ -62,6 +64,7 @@ class Client(threading.Thread):
             stop.set()
             return stop.set()
         print(data)
+        input("Press any key to continue to main menu")
 
 
 def main():  # pragma: no cover

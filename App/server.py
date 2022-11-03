@@ -1,6 +1,6 @@
 import socket
 import threading
-from os import listdir
+from os import listdir, remove
 from os.path import getsize
 import math
 
@@ -32,8 +32,7 @@ class Server(threading.Thread):
                     )
                 else:
                     self.apply_command(self.conn, data, username)
-            except OSError as e:
-                print(e)
+            except OSError:
                 print(
                     f"User:{username} running on {self.name} disconnected.\n")
                 break
@@ -47,8 +46,12 @@ class Server(threading.Thread):
             self.send_to_client(conn, all_files)
         elif data == "dc":
             conn.close()
-        elif data == "rm":
-            pass
+        elif "rm" in data:
+            file = "".join(data.split(" ")[1:])
+            print(f"\nRecieved command 'rm' from{username}. "
+                  f"They want to remove the file {file}.")
+            removed = self.remove_file(file)
+            self.send_to_client(conn, removed)
         elif data == "dwnl":
             pass
         elif data == "upld":
@@ -74,7 +77,7 @@ class Server(threading.Thread):
             conn.send(data.encode())
 
     def check_file_size(self, file):
-
+        # https://stackoverflow.com/questions/5194057/better-way-to-convert-file-sizes-in-python
         file_size = getsize(f"Data/{file}")
         if file_size == 0:
             return "0B"
@@ -88,8 +91,16 @@ class Server(threading.Thread):
         files = [f for f in listdir("Data")]
         return files
 
-    def remove_file():
-        pass
+    def remove_file(self, file):
+        try:
+            remove(f"Data/{file}")
+            data = f"\nFile '{file}' has been removed."
+            print(data)
+            return data
+        except OSError:
+            data = f"\n!!!File '{file}' does not exist!!!"
+            print(data)
+            return data
 
     def upload():
         pass
