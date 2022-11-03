@@ -1,5 +1,8 @@
 import socket
 import threading
+from os import listdir
+from os.path import getsize
+import math
 
 
 class Server(threading.Thread):
@@ -12,13 +15,90 @@ class Server(threading.Thread):
         self.clients = clients
 
     def run(self):
-        print(f"Thread {threading.active_count() - 1} started. Handling "
-              "connection from {self.addr}")
+        threads = []
+        threads.append(self.name)
         self.conn.sendall("You have connected to the FTP server".encode())
         self.running = True
         while self.running:
-            print("test")
-            break
+            try:
+                data = self.conn.recv(1024).decode()
+                if not data:
+                    return
+                elif "username" in data:
+                    username = "".join(data.split(":")[1:])
+                    print(
+                        f"Thread {threading.active_count() - 1} started. "
+                        f"Handling connection from user: {username} at connection {self.addr}"
+                    )
+                else:
+                    self.apply_command(self.conn, data, username)
+            except OSError as e:
+                print(e)
+                print(
+                    f"User:{username} running on {self.name} disconnected.\n")
+                break
+
+    def apply_command(self, conn, data, username):
+        if "/files" in data:
+            print(f"\nRecieved command '/files' from{username}. "
+                  "They want to know what files we have.")
+            all_files = self.files_on_serv()
+            print(f"\nThe files we have are the following: {all_files}")
+            self.send_to_client(conn, all_files)
+        elif data == "dc":
+            conn.close()
+        elif data == "rm":
+            pass
+        elif data == "dwnl":
+            pass
+        elif data == "upld":
+            pass
+        elif "/fs" in data:
+            try:
+                file = "".join(data.split(" ")[1:])
+                print(f"\nRecieved command '/fs' from{username}. "
+                      f"They want to know what the file size of '{file}' is.")
+                file_size = f"File size of '{file}' is: {self.check_file_size(file)}"
+                print(f"\n{file_size}")
+                self.send_to_client(conn, file_size)
+            except OSError:
+                data = "!!!That file does not exist!!!"
+                print(data)
+                self.send_to_client(conn, data)
+
+    def send_to_client(self, conn, data):
+        if type(data) == list:
+            data_str = str(data)
+            conn.send(data_str.encode())
+        else:
+            conn.send(data.encode())
+
+    def check_file_size(self, file):
+
+        file_size = getsize(f"Data/{file}")
+        if file_size == 0:
+            return "0B"
+        size_name = ("B", "KB", "MB", "GB")
+        i = int(math.floor(math.log(file_size, 1024)))
+        p = math.pow(1024, i)
+        s = round(file_size / p, 2)
+        return "%s %s" % (s, size_name[i])
+
+    def files_on_serv(self):
+        files = [f for f in listdir("Data")]
+        return files
+
+    def remove_file():
+        pass
+
+    def upload():
+        pass
+
+    def download():
+        pass
+
+    def broadcast_new_file():
+        pass
 
 
 def main():
