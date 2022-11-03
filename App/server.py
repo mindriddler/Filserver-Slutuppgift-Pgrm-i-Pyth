@@ -14,7 +14,7 @@ class Server(threading.Thread):
         self.addr = addr
         self.clients = clients
 
-    def run(self):
+    def run(self):  # pragma: no cover
         threads = []
         threads.append(self.name)
         self.conn.sendall("You have connected to the FTP server".encode())
@@ -37,7 +37,7 @@ class Server(threading.Thread):
                     f"User:{username} running on {self.name} disconnected.\n")
                 break
 
-    def apply_command(self, conn, data, username):
+    def apply_command(self, conn, data, username):  # pragma: no cover
         if "/files" in data:
             print(f"\nRecieved command '/files' from{username}. "
                   "They want to know what files we have.")
@@ -69,7 +69,7 @@ class Server(threading.Thread):
                 print(data)
                 self.send_to_client(conn, data)
 
-    def send_to_client(self, conn, data):
+    def send_to_client(self, conn, data):  # pragma: no cover
         if type(data) == list:
             data_str = str(data)
             conn.send(data_str.encode())
@@ -112,7 +112,7 @@ class Server(threading.Thread):
         pass
 
 
-def main():
+def main():  # pragma: no cover
     SERVER = '127.0.0.1'
     PORT = 44554
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
