@@ -1,27 +1,43 @@
 import socket
 import threading
-from os import listdir, remove
-from os.path import getsize
+import os
+import os.path
 import math
+import tqdm
+# im setting "# pragma: no cover" on all methods containing socket as i dont
+# know how to test them
 
 
 class Server(threading.Thread):
 
-    def __init__(self, conn, sock, addr, clients):
+    def __init__(
+        self,
+        conn,
+        sock,
+        addr,
+        clients,
+    ):
         threading.Thread.__init__(self)
         self.conn = conn
         self.sock = sock
         self.addr = addr
         self.clients = clients
+        self.SEPARATOR = "<SEPARATOR>"
+        self.BUFFER_SIZE = 4096
 
     def run(self):  # pragma: no cover
         threads = []
         threads.append(self.name)
         self.conn.sendall("You have connected to the FTP server".encode())
         self.running = True
+        # threading.Thread(target=self.broadcast_new_file,
+        #  args=(
+        #      self.conn,
+        #      self.clients,
+        #  )).start()
         while self.running:
             try:
-                data = self.conn.recv(1024).decode()
+                data = self.conn.recv(self.BUFFER_SIZE).decode()
                 if not data:
                     return
                 elif "username" in data:
@@ -31,13 +47,15 @@ class Server(threading.Thread):
                         f"Handling connection from user: {username} at connection {self.addr}"
                     )
                 else:
-                    self.apply_command(self.conn, data, username)
+                    self.apply_command(self.conn, data, username,
+                                       self.SEPARATOR, self.BUFFER_SIZE)
             except OSError:
                 print(
                     f"User:{username} running on {self.name} disconnected.\n")
                 break
 
-    def apply_command(self, conn, data, username):  # pragma: no cover
+    def apply_command(self, conn, data, username, SEPARATOR,
+                      BUFFER_SIZE):  # pragma: no cover
         if "/files" in data:
             print(f"\nRecieved command '/files' from{username}. "
                   "They want to know what files we have.")
@@ -54,8 +72,11 @@ class Server(threading.Thread):
             self.send_to_client(conn, removed)
         elif data == "dwnl":
             pass
-        elif data == "upld":
-            pass
+        elif "upld" in data:
+            # threading.Thread(target=self.upload,
+            #  args=(conn, data, SEPARATOR,
+            #        BUFFER_SIZE)).start()
+            self.upload(conn, data, SEPARATOR, BUFFER_SIZE)
         elif "/fs" in data:
             try:
                 file = "".join(data.split(" ")[1:])
@@ -78,7 +99,7 @@ class Server(threading.Thread):
 
     def check_file_size(self, file):
         # https://stackoverflow.com/questions/5194057/better-way-to-convert-file-sizes-in-python
-        file_size = getsize(f"Data/{file}")
+        file_size = os.path.getsize(f"Data/{file}")
         if file_size == 0:
             return "0B"
         size_name = ("B", "KB", "MB", "GB")
@@ -88,12 +109,12 @@ class Server(threading.Thread):
         return "%s %s" % (s, size_name[i])
 
     def files_on_serv(self):
-        files = [f for f in listdir("Data")]
+        files = [f for f in os.listdir("Data")]
         return files
 
     def remove_file(self, file):
         try:
-            remove(f"Data/{file}")
+            os.remove(f"Data/{file}")
             data = f"\nFile '{file}' has been removed."
             print(data)
             return data
@@ -102,14 +123,40 @@ class Server(threading.Thread):
             print(data)
             return data
 
-    def upload():
+    def upload(self, conn, data, SEPARATOR, BUFFER_SIZE):
+        print("UL thread started")
+        file_name, file_size = data.split(SEPARATOR)
+        file_name = os.path.basename(file_name)
+        file_size = int(file_size)
+        progress = tqdm.tqdm(range(file_size),
+                             f"Receiving {file_name}",
+                             unit="B",
+                             unit_scale=True,
+                             unit_divisor=1024)
+        with open(f"Data/{file_name}", "wb") as f:
+            while True:
+                bytes_read = conn.recv(BUFFER_SIZE)
+                if not bytes_read:
+                    break
+                f.write(bytes_read)
+                progress.update(len(bytes_read))
+            f.close()
+            threading.exit()
+
+    def download(self, data):
         pass
 
-    def download():
-        pass
-
-    def broadcast_new_file():
-        pass
+    # def broadcast_new_file(self, conn, clients):
+    #     print("thread started")
+    #     file_list = [f for f in os.listdir("Data")]
+    #     while True:
+    #         files = os.listdir("Data")
+    #         paths = [os.path.join("Data", basename) for basename in files]
+    #         newest_file = max(paths, key=os.path.getctime)
+    #         for conn in clients:
+    #             conn.send(
+    #                 f"New file has been added to the server: '{newest_file}'".
+    #                 encode())
 
 
 def main():  # pragma: no cover
