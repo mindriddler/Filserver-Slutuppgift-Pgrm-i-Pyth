@@ -7,31 +7,27 @@ import tqdm
 
 def apply_command(conn, data, username, SEPARATOR,
                   BUFFER_SIZE):  # pragma: no cover
-    if "/files" in data:
-        print(f"\nRecieved command '/files' from{username}. "
-              "They want to know what files we have.")
+    if data == "/files":
+        print(f"\nRecieved command '/files' from{username}.")
         all_files = files_on_serv()
-        print(f"\nThe files we have are the following: {all_files}")
         send_to_client(conn, all_files)
     elif data == "dc":
         conn.close()
-    elif "rm" in data:
-        file = "".join(data.split(" ")[1:])
-        print(f"\nRecieved command 'rm' from{username}. "
-              f"They want to remove the file {file}.")
+    elif data == "remove":
+        file = input("Enter filename: ")
+        print(f"\nRecieved command 'remove' from user{username}.")
         removed = remove_file(file)
         send_to_client(conn, removed)
     elif data == "dwnl":
         pass
-    elif "upld" in data:
-        upload(conn, data, SEPARATOR, BUFFER_SIZE)
-    elif "/fs" in data:
+    elif "upload" in data:
+        print(f"\nRecieved command 'upload' from user{username}.")
+        upload(conn, username)
+    elif data == "file_size":
         try:
-            file = "".join(data.split(" ")[1:])
-            print(f"\nRecieved command '/fs' from{username}. "
-                  f"They want to know what the file size of '{file}' is.")
+            file = input("Enter filename: ")
+            print(f"\nRecieved command 'file_size' from user{username}.")
             file_size = f"File size of '{file}' is: {check_file_size(file)}"
-            print(f"\n{file_size}")
             send_to_client(conn, file_size)
         except OSError:
             data = "!!!That file does not exist!!!"
@@ -89,8 +85,14 @@ def recieve_file_size(conn):
     return filesize
 
 
-def recieve_file(conn, filename):
+def upload(conn, username):
+    filename = conn.recv(1024).decode()
     filesize = recieve_file_size(conn)
+    progress = tqdm.tqdm(range(filesize),
+                         f"Recieving {filename} from user:{username}",
+                         unit="B",
+                         unit_scale=True,
+                         unit_divisor=1024)
     with open(f"Data\{filename}", "wb") as f:
         recieved_bytes = 0
         while recieved_bytes < filesize:
@@ -98,14 +100,9 @@ def recieve_file(conn, filename):
             if chunk:
                 f.write(chunk)
                 recieved_bytes += len(chunk)
+                progress.update(len(chunk))
         f.close()
-        print("Transfer completed")
-
-
-def upload(conn, data, SEPARATOR, BUFFER_SIZE):
-    file_path = conn.recv(1024).decode()
-    file_name = file_path
-    recieve_file(conn, file_name)
+    # print("\nTransfer completed")
 
 
 def download(data):

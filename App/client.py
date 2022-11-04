@@ -40,7 +40,7 @@ class Client(threading.Thread):
                                 "\n   COMMAND       | DESCRIPTION\n\n"
                                 "rm   <FILE_NAME> | Removes a file\n"
                                 "dwnl <FILE_NAME> | Upload a file\n"
-                                "upld <FILE_PATH> | Download a file\n"
+                                "upload           | Download a file\n"
                                 "/fs  <FILE_NAME> | Check file size\n"
                                 "/files           | Check available files\n\n"
                                 "dc               | Disconnect\n\n")
@@ -55,8 +55,8 @@ class Client(threading.Thread):
                     stop.set()
                     threads.remove(self.name)
                     break
-                elif "upld" in command:
-                    self.upload(sock, command, SEPARATOR, BUFFER_SIZE)
+                elif command == "upload":
+                    print(self.upload(sock, command))
                 else:
                     sock.sendall(command.encode())
             except OSError as e:
@@ -75,7 +75,7 @@ class Client(threading.Thread):
             print(data)
         # input("Press any key to continue to main menu")
 
-    def upload(self, sock, command, SEPARATOR, BUFFER_SIZE):
+    def upload(self, sock, command):
         sock.sendall(command.encode())
         file_path = input("File path: ")
         filename = os.path.basename(file_path)
@@ -83,11 +83,17 @@ class Client(threading.Thread):
         filesize = os.path.getsize(file_path)
         struct_test = struct.pack("<Q", filesize)
         sock.sendall(struct_test)
+        progress = tqdm.tqdm(range(filesize),
+                             f"Uploading {filename}",
+                             unit="B",
+                             unit_scale=True,
+                             unit_divisor=1024)
         with open(file_path, "rb") as f:
             while read_bytes := f.read(1024):
                 sock.sendall(read_bytes)
-            print("Transfer completed")
+                progress.update(len(read_bytes))
             f.close()
+        return "Transfer complete"
 
 
 def main():  # pragma: no cover
