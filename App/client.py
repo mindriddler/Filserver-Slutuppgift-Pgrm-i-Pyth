@@ -3,6 +3,7 @@ import socket
 import time
 import os
 import tqdm
+import struct
 
 
 class Client(threading.Thread):
@@ -14,7 +15,9 @@ class Client(threading.Thread):
         self.username = username
         self.threads = threads
         self.SEPARATOR = "<SEPARATOR>"
-        self.BUFFER_SIZE = 4096
+        self.BUFFER_SIZE = 1024
+        self.SERVER = '127.0.0.1'
+        self.PORT = 44554
 
     def run(self):
         self.sock.sendall(self.username.encode())
@@ -53,14 +56,7 @@ class Client(threading.Thread):
                     threads.remove(self.name)
                     break
                 elif "upld" in command:
-                    ul_thread = threading.Thread(target=self.upload,
-                                                 args=(
-                                                     sock,
-                                                     command,
-                                                     SEPARATOR,
-                                                     BUFFER_SIZE,
-                                                 ))
-                    ul_thread.start()
+                    self.upload(sock, command, SEPARATOR, BUFFER_SIZE)
                 else:
                     sock.sendall(command.encode())
             except OSError as e:
@@ -80,22 +76,18 @@ class Client(threading.Thread):
         # input("Press any key to continue to main menu")
 
     def upload(self, sock, command, SEPARATOR, BUFFER_SIZE):
-        file_path = "".join(command.split(" ")[1:])
-        file_name = "".join(file_path.split("/")[2:])
-        file_size = os.path.getsize(file_path)
-        sock.sendall(f"{command}{SEPARATOR}{file_size}".encode())
-        progress = tqdm.tqdm(range(file_size),
-                             f"Sending {file_name}",
-                             unit_scale=True,
-                             unit="B",
-                             unit_divisor=1024)
+        sock.sendall(command.encode())
+        file_path = input("File path: ")
+        filename = os.path.basename(file_path)
+        sock.sendall(filename.encode())
+        filesize = os.path.getsize(file_path)
+        struct_test = struct.pack("<Q", filesize)
+        sock.sendall(struct_test)
         with open(file_path, "rb") as f:
-            while True:
-                bytes_read = f.read(BUFFER_SIZE)
-                if not bytes_read:
-                    break
-                sock.sendall(bytes_read)
-                progress.update(len(bytes_read))
+            while read_bytes := f.read(1024):
+                sock.sendall(read_bytes)
+            print("Transfer completed")
+            f.close()
 
 
 def main():  # pragma: no cover
@@ -105,7 +97,7 @@ def main():  # pragma: no cover
     threads = []
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
         print("Connecting to server.\nPlease standby.")
-        time.sleep(3)  # Just for fun
+        # time.sleep(3)  # Just for fun
         try:
             sock.connect((SERVER, PORT))
         except ConnectionRefusedError as e:
