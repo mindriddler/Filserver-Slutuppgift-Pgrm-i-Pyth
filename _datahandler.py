@@ -6,9 +6,6 @@ import os.path
 
 class DataHandler:  # pragma: no cover
 
-    def __init__(self) -> None:
-        pass
-
     def recieve_file_size(self, conn):
         fmt = "<Q"
         expected_bytes = struct.calcsize(fmt)
@@ -22,23 +19,27 @@ class DataHandler:  # pragma: no cover
         return filesize
 
     def client_recieve(self, sock, filename, download_location):
-        sock.sendall(filename.encode())
-        filesize = self.recieve_file_size(sock)
-        progress = tqdm.tqdm(range(filesize),
-                             f"Recieving {filename}",
-                             unit="B",
-                             unit_scale=True,
-                             unit_divisor=1024)
-        with open(f"{download_location}{filename}", "wb") as f:
-            recieved_bytes = 0
-            while recieved_bytes < filesize:
-                chunk = sock.recv(1024)
-                if chunk:
-                    f.write(chunk)
-                    recieved_bytes += len(chunk)
-                    progress.update(len(chunk))
-            f.close()
-        print(f"\nFile '{filename}' has been recieved.")
+        try:
+            sock.sendall(filename.encode())
+            filesize = self.recieve_file_size(sock)
+            progress = tqdm.tqdm(range(filesize),
+                                 f"Recieving {filename}",
+                                 unit="B",
+                                 unit_scale=True,
+                                 unit_divisor=1024,
+                                 disable=False)
+            with open(f"{download_location}{filename}", "wb") as f:
+                recieved_bytes = 0
+                while recieved_bytes < filesize:
+                    chunk = sock.recv(1024)
+                    if chunk:
+                        f.write(chunk)
+                        recieved_bytes += len(chunk)
+                        progress.update(len(chunk))
+                f.close()
+            print(f"\nFile '{filename}' has been recieved.")
+        except AttributeError:
+            pass
 
     def server_recieve(self, conn, username, DATA_FOLDER, clients):
         curr_files = [f for f in listdir(DATA_FOLDER)]
@@ -76,6 +77,7 @@ class DataHandler:  # pragma: no cover
                 conn.sendall(read_bytes)
                 progress.update(len(read_bytes))
             f.close()
+        conn.send("Transfer complete".encode())
         return "Transfer complete"
 
     def upload(self, sock, command):

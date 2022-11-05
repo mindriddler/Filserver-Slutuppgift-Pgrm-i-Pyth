@@ -2,12 +2,13 @@ import threading
 import socket
 import os
 from time import sleep
-from _datahandler import DataHandler
+from _datahandler import DataHandler as dh
+from queue import Queue
 
 
 class Client(threading.Thread):
 
-    def __init__(self, sock, stop, username, threads):
+    def __init__(self, sock, stop, username, threads, q):
         threading.Thread.__init__(self)
         self.sock = sock
         self.stop = stop
@@ -19,16 +20,14 @@ class Client(threading.Thread):
         print(self.sock.recv(8192).decode())
         self.threads.append(
             f"{self.name}:{socket.gethostbyname(socket.gethostname())}")
-        threading.Thread(target=self.menu,
+        threading.Thread(target=self.recieve_data,
                          args=(
                              self.sock,
                              self.stop,
-                             self.threads,
-                             self.username,
                          )).start()
+
         while not self.stop.is_set():
-            self.recieve_data(self.sock, self.stop)
-            print(">> ")
+            self.menu(self.sock, self.stop, self.threads, self.username)
 
     def menu(self, sock, stop, threads, username):
         threads.append(self.name)
@@ -58,7 +57,7 @@ class Client(threading.Thread):
                     threads.remove(self.name)
                     break
                 elif command == "upload":
-                    ul_thread = threading.Thread(target=DataHandler().upload,
+                    ul_thread = threading.Thread(target=dh().upload,
                                                  args=(sock, command))
                     ul_thread.start()
                 elif command == "file_size" or command == "remove":
@@ -69,24 +68,23 @@ class Client(threading.Thread):
                     sock.sendall(command.encode())
                     filename = input("Enter filename: ")
                     download_location = input("Enter download location: ")
-                    dl_thread = threading.Thread(
-                        target=DataHandler().client_recieve,
-                        args=(sock, filename, download_location),
-                        daemon=True)
-                    dl_thread.start()
-                    dl_thread.join()
+                    dh().client_recieve(sock, filename, download_location)
                 else:
                     sock.sendall(command.encode())
             except OSError as e:
                 print(e)
 
     def recieve_data(self, sock, stop):
-        data = sock.recv(8192).decode()
-        if not data:
-            return
-        else:
-            print(data)
-        # input("Press any key to continue to main menu")
+        while True:
+            try:
+                data = sock.recv(8192).decode()
+                if not data:
+                    return
+                else:
+                    print(data)
+                # input("Press any key to continue to main menu")
+            except UnicodeDecodeError:
+                return
 
 
 def main():  # pragma: no cover
@@ -94,6 +92,7 @@ def main():  # pragma: no cover
     PORT = 44554
     stop = threading.Event()
     threads = []
+    q = Queue()
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
         print("Connecting to server.\nPlease standby.")
         # time.sleep(3)  # Just for fun
@@ -105,7 +104,7 @@ def main():  # pragma: no cover
             return
         username = input(f"\n\nConnect to {SERVER}:{PORT}\n"
                          "Enter your username: ")
-        client = Client(sock, stop, username, threads)
+        client = Client(sock, stop, username, threads, q)
         client.start()
         client.join()
 
