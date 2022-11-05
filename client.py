@@ -1,9 +1,8 @@
 import threading
 import socket
 import os
-import tqdm
-import struct
 from time import sleep
+from _datahandler import DataHandler
 
 
 class Client(threading.Thread):
@@ -21,8 +20,12 @@ class Client(threading.Thread):
         self.threads.append(
             f"{self.name}:{socket.gethostbyname(socket.gethostname())}")
         threading.Thread(target=self.menu,
-                         args=(self.sock, self.stop, self.threads,
-                               self.username)).start()
+                         args=(
+                             self.sock,
+                             self.stop,
+                             self.threads,
+                             self.username,
+                         )).start()
         while not self.stop.is_set():
             self.recieve_data(self.sock, self.stop)
             print(">> ")
@@ -55,9 +58,23 @@ class Client(threading.Thread):
                     threads.remove(self.name)
                     break
                 elif command == "upload":
-                    ul_thread = threading.Thread(target=self.upload,
+                    ul_thread = threading.Thread(target=DataHandler().upload,
                                                  args=(sock, command))
                     ul_thread.start()
+                elif command == "file_size" or command == "remove":
+                    sock.sendall(command.encode())
+                    filename = input("Enter filename: ")
+                    sock.sendall(filename.encode())
+                elif command == "download":
+                    sock.sendall(command.encode())
+                    filename = input("Enter filename: ")
+                    download_location = input("Enter download location: ")
+                    dl_thread = threading.Thread(
+                        target=DataHandler().client_recieve,
+                        args=(sock, filename, download_location),
+                        daemon=True)
+                    dl_thread.start()
+                    dl_thread.join()
                 else:
                     sock.sendall(command.encode())
             except OSError as e:
@@ -66,35 +83,10 @@ class Client(threading.Thread):
     def recieve_data(self, sock, stop):
         data = sock.recv(8192).decode()
         if not data:
-            sock.close()
-            stop.set()
-            return stop.set()
-        elif "added to the server" in data:
-            print(data)
-            print("Write your menu command below!")
+            return
         else:
             print(data)
         # input("Press any key to continue to main menu")
-
-    def upload(self, sock, command):
-        sock.sendall(command.encode())
-        file_path = input("File path: ")
-        filename = os.path.basename(file_path)
-        sock.sendall(filename.encode())
-        filesize = os.path.getsize(file_path)
-        struct_test = struct.pack("<Q", filesize)
-        sock.sendall(struct_test)
-        progress = tqdm.tqdm(range(filesize),
-                             f"Uploading {filename}",
-                             unit="B",
-                             unit_scale=True,
-                             unit_divisor=1024)
-        with open(file_path, "rb") as f:
-            while read_bytes := f.read(1024):
-                sock.sendall(read_bytes)
-                progress.update(len(read_bytes))
-            f.close()
-        return "Transfer complete"
 
 
 def main():  # pragma: no cover

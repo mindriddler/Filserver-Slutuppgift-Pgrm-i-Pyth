@@ -1,8 +1,7 @@
 import socket
 import threading
 import _functions as _f
-# im setting "# pragma: no cover" on all methods containing socket as i dont
-# know how to test them
+import platform
 
 
 class Server(threading.Thread):
@@ -15,7 +14,7 @@ class Server(threading.Thread):
         self.clients = clients
         self.DATA_FOLDER = DATA_FOLDER
 
-    def run(self):  # pragma: no cover
+    def run(self):
         threads = []
         threads.append(self.name)
         self.conn.sendall("You have connected to the FTP server".encode())
@@ -37,13 +36,10 @@ class Server(threading.Thread):
                     self.clients.remove(self.conn)
                     break
                 else:
-                    _f.apply_command(
-                        self.conn,
-                        data,
-                        self.username,
-                        self.DATA_FOLDER,
-                        self.clients,
-                    )
+                    returned = _f.apply_command(self.sock, self.conn, data,
+                                                self.username,
+                                                self.DATA_FOLDER, self.clients)
+                    self.send_to_client(self.conn, returned)
             except OSError:
                 print(
                     f"User: {self.username} running on thread {threading.active_count() - 1} disconnected.\n"
@@ -51,19 +47,26 @@ class Server(threading.Thread):
                 self.clients.remove(self.conn)
                 break
 
+    def send_to_client(self, conn, data):
+        if type(data) == list:
+            data_str = str(data)
+            conn.send(data_str.encode())
+        elif data is None:
+            pass
+        else:
+            conn.send(data.encode())
 
-def main():  # pragma: no cover
+
+def main():
     SERVER = '127.0.0.1'
     PORT = 44554
-    operation_system = input(
-        "Is the server running on Windows, Linux or Mac?: ").lower()
-    if operation_system == "windows":
+    operation_system = platform.platform()
+    if "Windows" in operation_system:
         DATA_FOLDER = "Data\\"
-    elif operation_system == "linux" or operation_system == "Mac":
+        print("Server is running on a Windows system")
+    elif "Linux" or "Mac" in operation_system:
         DATA_FOLDER = "Data/"
-    else:
-        print("Invalid input. Exiting...")
-        exit()
+        print("Server is running on a Linux system")
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         sock.bind((SERVER, PORT))
@@ -78,5 +81,5 @@ def main():  # pragma: no cover
             Server(conn, sock, addr, clients, DATA_FOLDER).start()
 
 
-if __name__ == '__main__':  # pragma: no cover
+if __name__ == '__main__':
     main()
