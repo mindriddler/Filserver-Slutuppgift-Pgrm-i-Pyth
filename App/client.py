@@ -1,9 +1,9 @@
 import threading
 import socket
-import time
 import os
 import tqdm
 import struct
+from time import sleep
 
 
 class Client(threading.Thread):
@@ -14,10 +14,6 @@ class Client(threading.Thread):
         self.stop = stop
         self.username = username
         self.threads = threads
-        self.SEPARATOR = "<SEPARATOR>"
-        self.BUFFER_SIZE = 1024
-        self.SERVER = '127.0.0.1'
-        self.PORT = 44554
 
     def run(self):
         self.sock.sendall(self.username.encode())
@@ -26,24 +22,27 @@ class Client(threading.Thread):
             f"{self.name}:{socket.gethostbyname(socket.gethostname())}")
         threading.Thread(target=self.menu,
                          args=(self.sock, self.stop, self.threads,
-                               self.username, self.BUFFER_SIZE,
-                               self.SEPARATOR)).start()
+                               self.username)).start()
         while not self.stop.is_set():
             self.recieve_data(self.sock, self.stop)
+            print(">> ")
 
-    def menu(self, sock, stop, threads, username, BUFFER_SIZE, SEPARATOR):
+    def menu(self, sock, stop, threads, username):
         threads.append(self.name)
         while not stop.is_set():
             try:
-                time.sleep(0.01)
-                command = input(f"\n{username}\n"
-                                "\n   COMMAND       | DESCRIPTION\n\n"
-                                "rm   <FILE_NAME> | Removes a file\n"
-                                "dwnl <FILE_NAME> | Upload a file\n"
-                                "upload           | Download a file\n"
-                                "/fs  <FILE_NAME> | Check file size\n"
-                                "/files           | Check available files\n\n"
-                                "dc               | Disconnect\n\n")
+                sleep(0.05)
+                input("Press any key to continue")
+                command = input(f"\nUsername: {username}\n"
+                                "\nCOMMAND   | DESCRIPTION\n"
+                                "---------------------------\n"
+                                "remove    | Removes a file\n"
+                                "download  | Upload a file\n"
+                                "upload    | Download a file\n"
+                                "file_size | Check file size\n"
+                                "files     | Check available files\n"
+                                "dc        | Disconnect\n\n"
+                                "Enter command: ")
                 if command == "":
                     input(
                         "You didnt enter a command.\nTry again.\nPress any key to continue."
@@ -56,7 +55,9 @@ class Client(threading.Thread):
                     threads.remove(self.name)
                     break
                 elif command == "upload":
-                    print(self.upload(sock, command))
+                    ul_thread = threading.Thread(target=self.upload,
+                                                 args=(sock, command))
+                    ul_thread.start()
                 else:
                     sock.sendall(command.encode())
             except OSError as e:
@@ -110,8 +111,8 @@ def main():  # pragma: no cover
             input(f"{e}. Is the server running?\n\n"
                   "Press any key to continue.")
             return
-        username = "username: " + input(f"\n\nConnect to {SERVER}:{PORT}\n"
-                                        "Enter your username: ")
+        username = input(f"\n\nConnect to {SERVER}:{PORT}\n"
+                         "Enter your username: ")
         client = Client(sock, stop, username, threads)
         client.start()
         client.join()

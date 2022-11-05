@@ -7,59 +7,63 @@ import _functions as _f
 
 class Server(threading.Thread):
 
-    def __init__(
-        self,
-        conn,
-        sock,
-        addr,
-        clients,
-    ):
+    def __init__(self, conn, sock, addr, clients, DATA_FOLDER):
         threading.Thread.__init__(self)
         self.conn = conn
         self.sock = sock
         self.addr = addr
         self.clients = clients
-        self.SEPARATOR = "<SEPARATOR>"
-        self.BUFFER_SIZE = 4096
+        self.DATA_FOLDER = DATA_FOLDER
 
     def run(self):  # pragma: no cover
         threads = []
         threads.append(self.name)
         self.conn.sendall("You have connected to the FTP server".encode())
         self.running = True
-        # threading.Thread(target=self.broadcast_new_file,
-        #  args=(
-        #      self.conn,
-        #      self.clients,
-        #  )).start()
+        self.username = self.conn.recv(8192).decode()
+        print(f"Thread {threading.active_count() - 1} started. "
+              f"Handling connection from user '{self.username}' "
+              f"at connection {self.addr}")
         while self.running:
+
             try:
-                data = self.conn.recv(self.BUFFER_SIZE).decode()
+                data = self.conn.recv(1024).decode()
                 if not data:
                     return
-                elif "username" in data:
-                    username = "".join(data.split(":")[1:])
+                elif data == "dc":
                     print(
-                        f"Thread {threading.active_count() - 1} started. "
-                        f"Handling connection from user: {username} at connection {self.addr}"
+                        f"User: {self.username} running on thread {threading.active_count() - 1} disconnected.\n"
                     )
+                    self.clients.remove(self.conn)
+                    break
                 else:
                     _f.apply_command(
                         self.conn,
                         data,
-                        username,
-                        self.SEPARATOR,
-                        self.BUFFER_SIZE,
+                        self.username,
+                        self.DATA_FOLDER,
+                        self.clients,
                     )
             except OSError:
                 print(
-                    f"User:{username} running on {self.name} disconnected.\n")
+                    f"User: {self.username} running on thread {threading.active_count() - 1} disconnected.\n"
+                )
+                self.clients.remove(self.conn)
                 break
 
 
 def main():  # pragma: no cover
     SERVER = '127.0.0.1'
     PORT = 44554
+    operation_system = input(
+        "Is the server running on Windows, Linux or Mac?: ").lower()
+    if operation_system == "windows":
+        DATA_FOLDER = "Data\\"
+    elif operation_system == "linux" or operation_system == "Mac":
+        DATA_FOLDER = "Data/"
+    else:
+        print("Invalid input. Exiting...")
+        exit()
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         sock.bind((SERVER, PORT))
@@ -71,7 +75,7 @@ def main():  # pragma: no cover
             conn, addr = sock.accept()
             clients.append(conn)
             print("Got connection from", addr)
-            Server(conn, sock, addr, clients).start()
+            Server(conn, sock, addr, clients, DATA_FOLDER).start()
 
 
 if __name__ == '__main__':  # pragma: no cover
