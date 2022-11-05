@@ -24,6 +24,7 @@ class Server(threading.Thread):
               f"Handling connection from user '{self.username}' "
               f"at connection {self.addr}")
         while self.running:
+
             try:
                 data = self.conn.recv(1024).decode()
                 if not data:

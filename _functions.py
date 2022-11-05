@@ -20,7 +20,6 @@ def apply_command(sock, conn, data, username, DATA_FOLDER,
     elif data == "download":
         print(f"\nRecieved command 'download' from user: {username}.")
         dh().upload_to_client(conn, DATA_FOLDER)
-
     elif data == "upload":
         print(f"\nRecieved command 'upload' from user: {username}.")
         dh().server_recieve(conn, username, DATA_FOLDER, clients)
