@@ -21,7 +21,9 @@ class DataHandler:  # pragma: no cover
         filesize = struct.unpack(fmt, stream)[0]
         return filesize
 
-    def client_recieve(self, sock, filename, download_location):
+    def client_recieve(self, sock):
+        filename = input("Enter filename: ")
+        download_location = input("Enter download location: ")
         sock.sendall(filename.encode())
         filesize = self.recieve_file_size(sock)
         progress = tqdm.tqdm(range(filesize),
@@ -62,6 +64,7 @@ class DataHandler:  # pragma: no cover
         self.broadcast_new_file(conn, username, clients, filename, curr_files)
 
     def upload_to_client(self, conn, DATA_FOLDER):
+        conn.sendall("download".encode())
         filename = conn.recv(1024).decode()
         filesize = os.path.getsize(f"{DATA_FOLDER}{filename}")
         struct_test = struct.pack("<Q", filesize)
@@ -107,6 +110,7 @@ class DataHandler:  # pragma: no cover
 
         if filename not in curr_files:
             for conn in clients:
+                conn.send("broadcast".encode())
                 conn.sendall(new_file_uploaded.encode())
         else:
             print("\nDuplicate file. Not broadcasting.")

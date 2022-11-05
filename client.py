@@ -7,31 +7,26 @@ from _datahandler import DataHandler
 
 class Client(threading.Thread):
 
-    def __init__(self, sock, stop, username, threads):
+    def __init__(self, sock, stop, username):
         threading.Thread.__init__(self)
         self.sock = sock
         self.stop = stop
         self.username = username
-        self.threads = threads
 
     def run(self):
         self.sock.sendall(self.username.encode())
-        print(self.sock.recv(8192).decode())
-        self.threads.append(
-            f"{self.name}:{socket.gethostbyname(socket.gethostname())}")
+        print(self.sock.recv(1024).decode())
         threading.Thread(target=self.menu,
-                         args=(
-                             self.sock,
-                             self.stop,
-                             self.threads,
-                             self.username,
-                         )).start()
+                         args=(self.sock, self.stop, self.username)).start()
+        # self.menu(self.sock, self.stop, self.username)
         while not self.stop.is_set():
-            self.recieve_data(self.sock, self.stop)
-            print(">> ")
+            data = self.sock.recv(1024).decode()
+            if not data:
+                break
+            else:
+                self.recieve_data(self.sock, self.stop, data)
 
-    def menu(self, sock, stop, threads, username):
-        threads.append(self.name)
+    def menu(self, sock, stop, username):
         while not stop.is_set():
             try:
                 sleep(0.05)
@@ -55,45 +50,40 @@ class Client(threading.Thread):
                     sock.sendall(command.encode())
                     sock.close()
                     stop.set()
-                    threads.remove(self.name)
                     break
                 elif command == "upload":
-                    ul_thread = threading.Thread(target=DataHandler().upload,
-                                                 args=(sock, command))
-                    ul_thread.start()
+                    DataHandler().upload(sock, command)
                 elif command == "file_size" or command == "remove":
                     sock.sendall(command.encode())
                     filename = input("Enter filename: ")
                     sock.sendall(filename.encode())
                 elif command == "download":
                     sock.sendall(command.encode())
-                    filename = input("Enter filename: ")
-                    download_location = input("Enter download location: ")
-                    dl_thread = threading.Thread(
-                        target=DataHandler().client_recieve,
-                        args=(sock, filename, download_location),
-                        daemon=True)
-                    dl_thread.start()
-                    dl_thread.join()
                 else:
                     sock.sendall(command.encode())
             except OSError as e:
                 print(e)
 
-    def recieve_data(self, sock, stop):
-        data = sock.recv(8192).decode()
-        if not data:
-            return
-        else:
-            print(data)
-        # input("Press any key to continue to main menu")
+    def recieve_data(self, sock, stop, data):
+        try:
+            if not data:
+                return
+            if data == "download":
+                DataHandler().client_recieve(sock)
+            elif data == "files":
+                data = sock.recv(1024).decode()
+                print(data)
+            elif data == "broadcast":
+                data = sock.recv(1024).decode()
+                print(data)
+        except UnicodeDecodeError:
+            DataHandler().client_recieve(sock)
 
 
 def main():  # pragma: no cover
     SERVER = '127.0.0.1'
     PORT = 44554
     stop = threading.Event()
-    threads = []
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
         print("Connecting to server.\nPlease standby.")
         # time.sleep(3)  # Just for fun
@@ -105,7 +95,7 @@ def main():  # pragma: no cover
             return
         username = input(f"\n\nConnect to {SERVER}:{PORT}\n"
                          "Enter your username: ")
-        client = Client(sock, stop, username, threads)
+        client = Client(sock, stop, username)
         client.start()
         client.join()
 

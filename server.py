@@ -19,7 +19,7 @@ class Server(threading.Thread):
         threads.append(self.name)
         self.conn.sendall("You have connected to the FTP server".encode())
         self.running = True
-        self.username = self.conn.recv(8192).decode()
+        self.username = self.conn.recv(1024).decode()
         print(f"Thread {threading.active_count() - 1} started. "
               f"Handling connection from user '{self.username}' "
               f"at connection {self.addr}")

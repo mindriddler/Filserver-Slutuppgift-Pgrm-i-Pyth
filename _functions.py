@@ -8,6 +8,7 @@ def apply_command(sock, conn, data, username, DATA_FOLDER,
                   clients):  # pragma: no cover
     if data == "files":
         print(f"\nRecieved command 'files' from: {username}.")
+        conn.sendall("files".encode())
         all_files = files_on_serv()
         return all_files
     elif data == "dc":
