@@ -36,8 +36,7 @@ class Server(threading.Thread):
                     self.clients.remove(self.conn)
                     break
                 else:
-                    returned = _f.apply_command(self.sock, self.conn, data,
-                                                self.username,
+                    returned = _f.apply_command(self.conn, data, self.username,
                                                 self.DATA_FOLDER, self.clients)
                     self.send_to_client(self.conn, returned)
             except OSError:
@@ -58,7 +57,7 @@ class Server(threading.Thread):
 
 
 def main():
-    SERVER = '127.0.0.1'
+    SERVER = "127.0.0.1"
     PORT = 44554
     operation_system = platform.platform()
     if "Windows" in operation_system:
@@ -81,5 +80,5 @@ def main():
             Server(conn, sock, addr, clients, DATA_FOLDER).start()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

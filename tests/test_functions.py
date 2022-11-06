@@ -18,13 +18,17 @@ def test_file_doesnt_exist():
 
 
 def test_check_file_size():
-    assert check_file_size(file="file_for_testing_0B.txt",
-                           DATA_FOLDER=DATA_FOLDER) == "0B"
+    assert check_file_size(
+        file="file_for_testing_0B.txt",
+        DATA_FOLDER=DATA_FOLDER,
+    ) == "0B"
 
 
 def test_check_file_size_file_0B():
-    assert check_file_size(file="Anduin.jpg",
-                           DATA_FOLDER=DATA_FOLDER) == "3.29 MB"
+    assert check_file_size(
+        file="Anduin.jpg",
+        DATA_FOLDER=DATA_FOLDER,
+    ) == "3.29 MB"
 
 
 def test_rm_file():

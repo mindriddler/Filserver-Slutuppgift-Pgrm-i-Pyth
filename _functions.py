@@ -4,7 +4,7 @@ import os.path
 from _datahandler import DataHandler as dh
 
 
-def apply_command(sock, conn, data, username, DATA_FOLDER,
+def apply_command(conn, data, username, DATA_FOLDER,
                   clients):  # pragma: no cover
     if data == "files":
         print(f"\nRecieved command 'files' from: {username}.")
@@ -15,6 +15,7 @@ def apply_command(sock, conn, data, username, DATA_FOLDER,
         conn.close()
     elif data == "remove":
         file = conn.recv(1024).decode()
+        conn.sendall("remove".encode())
         print(f"\nRecieved command 'remove' from user: {username}.")
         removed = remove_file(file, DATA_FOLDER)
         return removed
@@ -22,13 +23,17 @@ def apply_command(sock, conn, data, username, DATA_FOLDER,
         print(f"\nRecieved command 'download' from user: {username}.")
         dh().upload_to_client(conn, DATA_FOLDER)
     elif data == "upload":
+        conn.sendall("upload".encode())
         print(f"\nRecieved command 'upload' from user: {username}.")
         dh().server_recieve(conn, username, DATA_FOLDER, clients)
     elif data == "file_size":
         try:
             file = conn.recv(1024).decode()
+            conn.sendall("file_size".encode())
             print(f"\nRecieved command 'file_size' from user: {username}.")
-            file_size = f"File size of '{file}' is: {check_file_size(file, DATA_FOLDER)}"
+            file_size = (
+                f"File size of '{file}' is: {check_file_size(file, DATA_FOLDER)}"
+            )
             return file_size
         except OSError:
             data = "!!!That file does not exist!!!"
