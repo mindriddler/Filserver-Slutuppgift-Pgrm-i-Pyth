@@ -2,8 +2,7 @@ import threading
 import socket
 import os
 import platform
-from time import sleep
-from _datahandler import DataHandler
+from _datahandler import DataHandler_Client
 
 
 class Client(threading.Thread):
@@ -35,8 +34,13 @@ class Client(threading.Thread):
         else:
             os.system("clear")
         print(self.sock.recv(1024).decode())
-        threading.Thread(target=self.send_command_to_server,
-                         args=(self.sock, self.stop, self.menu)).start()
+        threading.Thread(target=DataHandler_Client().send_command_to_server,
+                         args=(
+                             self.sock,
+                             self.stop,
+                             self.menu,
+                             self.operation_system,
+                         )).start()
         while not self.stop.is_set():
             try:
                 data = self.sock.recv(1024).decode()
@@ -46,47 +50,13 @@ class Client(threading.Thread):
                     print("You have disconnected from the server.")
                     break
                 else:
-                    DataHandler().recieve_data(
+                    DataHandler_Client().recieve_data(
                         self.sock,
                         data,
                         self.dl_location,
                     )
             except ConnectionAbortedError:
                 print("You have disconnected from the server.")
-
-    def send_command_to_server(self, sock, stop, menu):
-        while not stop.is_set():
-            try:
-                sleep(0.05)
-                command = input(menu)
-                if command == "dc":
-                    sock.sendall(command.encode())
-                    sock.close()
-                    stop.set()
-                    exit()
-                elif command == "dl_local":
-                    self.dl_location = input("New download location: ")
-                elif command == "upload":
-                    sock.sendall(command.encode())
-                elif command == "file_size" or command == "remove":
-                    sock.sendall(command.encode())
-                    filename = input("Enter filename: ")
-                    sock.sendall(filename.encode())
-                elif command == "files":
-                    sock.sendall(command.encode())
-                elif command == "download":
-                    sock.sendall(command.encode())
-                else:
-                    input("You didn't enter a command.\n"
-                          "Try again.\n"
-                          "Press any key to continue.")
-                    if "Windows" in self.operation_system:
-                        os.system("cls")
-                    else:
-                        os.system("clear")
-            except OSError as e:
-                print(e)
-                break
 
 
 def main():

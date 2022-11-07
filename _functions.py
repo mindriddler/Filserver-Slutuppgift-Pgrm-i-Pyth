@@ -1,10 +1,6 @@
 import math
 import os
 import os.path
-from _datahandler import DataHandler
-
-
-
 
 
 def check_file_size(file, DATA_FOLDER):
@@ -34,3 +30,13 @@ def remove_file(file, DATA_FOLDER):
         data = f"\n!!!File '{file}' does not exist!!!"
         print(data)
         return data
+
+
+def get_file_name():
+    filename = input("Enter filename: ")
+    return filename
+
+
+def get_file_path():
+    file_path = input("File path: ")
+    return file_path
