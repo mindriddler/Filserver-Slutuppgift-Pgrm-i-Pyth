@@ -13,32 +13,34 @@ def test_files_on_serv():
 
 
 def test_file_doesnt_exist():
-    assert (remove_file(
-        file="file_for_testing_remov.txt",
-        DATA_FOLDER=DATA_FOLDER,
-    ) == "\n!!!File 'file_for_testing_remov.txt' does not exist!!!")
+    assert (remove_file("file_for_testing_remov.txt", DATA_FOLDER) ==
+            "\n!!!File 'file_for_testing_remov.txt' does not exist!!!")
 
 
-def test_check_file_size():
-    assert (check_file_size(
-        file="file_for_testing_0B.txt",
-        DATA_FOLDER=DATA_FOLDER,
-    ) == "0B")
+def test_check_file_size_0B():
+    assert check_file_size("file_for_testing_0B.txt", DATA_FOLDER) == "0B"
 
 
-def test_check_file_size_file_0B():
-    assert (check_file_size(
-        file="Anduin.jpg",
-        DATA_FOLDER=DATA_FOLDER,
-    ) == "3.29 MB")
+def test_check_file_size_B():
+    assert check_file_size("bytes.txt", DATA_FOLDER) == "17.0 B"
+
+
+def test_check_file_size_KB():
+    assert check_file_size("KB.pdf", DATA_FOLDER) == "195.5 KB"
+
+
+def test_check_file_size_MB():
+    assert check_file_size("Anduin.jpg", DATA_FOLDER) == "3.29 MB"
+
+
+def test_check_file_size_GB():
+    assert check_file_size("GB.mkv", DATA_FOLDER) == "3.69 GB"
 
 
 def test_rm_file():
     open("Data/file_for_testing_remove.txt", "w")
-    assert (remove_file(
-        file="file_for_testing_remove.txt",
-        DATA_FOLDER=DATA_FOLDER,
-    ) == "\nFile 'file_for_testing_remove.txt' has been removed.")
+    assert (remove_file("file_for_testing_remove.txt", DATA_FOLDER) ==
+            "\nFile 'file_for_testing_remove.txt' has been removed.")
 
 
 def test_broadcast():

@@ -35,6 +35,8 @@ class Server(threading.Thread):
                         f"User: {self.username} running on thread {threading.active_count() - 1} disconnected.\n"
                     )
                     self.clients.remove(self.conn)
+                    self.conn.send("dc".encode())
+                    self.conn.close()
                     break
                 else:
                     returned = _f.apply_command(self.conn, data, self.username,

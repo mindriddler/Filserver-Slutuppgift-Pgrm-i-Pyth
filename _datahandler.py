@@ -82,9 +82,8 @@ class DataHandler:
             print(
                 f"\nFile '{filename}' has been recieved from user: {username}."
             )
-            broadcast_var = self.broadcast_new_file(conn, username, clients,
-                                                    filename, curr_files)
-            return broadcast_var
+            return self.broadcast_new_file(conn, username, clients, filename,
+                                           curr_files)
 
     def upload_to_client(self, conn, DATA_FOLDER):
         try:
@@ -134,10 +133,8 @@ class DataHandler:
 
     def broadcast_new_file(self, conn, username, clients, filename,
                            curr_files):
-        new_file_uploaded = f"\nNew file '{filename}' uploaded by user '{username}'"
-
         if filename not in curr_files:
             print("Broadcasting the server got a new file.")
-            return new_file_uploaded
+            return f"\nNew file '{filename}' uploaded by user '{username}'"
         else:
             print("\nDuplicate file. Not broadcasting.")
