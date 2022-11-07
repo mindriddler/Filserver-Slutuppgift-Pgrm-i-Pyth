@@ -2,7 +2,6 @@ import struct
 import tqdm
 from os import listdir
 import os.path
-import time
 
 
 class DataHandler:
@@ -58,7 +57,7 @@ class DataHandler:
             f.close()
         print(f"\nFile '{filename}' has been recieved.")
 
-    def server_recieve(self, conn, username, DATA_FOLDER, clients):
+    def server_recieve(self, conn, username, DATA_FOLDER):
         curr_files = [f for f in listdir(DATA_FOLDER)]
         filename = conn.recv(1024).decode()
         if filename == " ":
@@ -82,8 +81,7 @@ class DataHandler:
             print(
                 f"\nFile '{filename}' has been recieved from user: {username}."
             )
-            return self.broadcast_new_file(conn, username, clients, filename,
-                                           curr_files)
+            return self.broadcast_new_file(username, filename, curr_files)
 
     def upload_to_client(self, conn, DATA_FOLDER):
         try:
@@ -131,8 +129,7 @@ class DataHandler:
             print("The file does not exist.")
             sock.send(" ".encode())
 
-    def broadcast_new_file(self, conn, username, clients, filename,
-                           curr_files):
+    def broadcast_new_file(self, username, filename, curr_files):
         if filename not in curr_files:
             print("Broadcasting the server got a new file.")
             return f"\nNew file '{filename}' uploaded by user '{username}'"

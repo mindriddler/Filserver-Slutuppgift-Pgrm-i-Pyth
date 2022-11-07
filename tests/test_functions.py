@@ -56,9 +56,7 @@ def test_broadcast():
         class_init = DataHandler()
         open(f"{DATA_FOLDER}test_broadcast_file.txt", "w")
         assert (class_init.broadcast_new_file(
-            sock,
             username,
-            clients,
             filename,
             files,
         ) == f"\nNew file '{filename}' uploaded by user '{username}'")
