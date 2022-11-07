@@ -10,7 +10,8 @@ class DataHandler_Client:
     def __init__(self) -> None:
         pass
 
-    def send_command_to_server(self, sock, stop, menu, operation_system):
+    def send_command_to_server(self, sock, menu,
+                               operation_system):  # pragma: no cover
         running = True
         while running:
             try:
@@ -45,7 +46,7 @@ class DataHandler_Client:
                 print(e)
                 break
 
-    def recieve_data(self, sock, data, dl_location):
+    def recieve_data(self, sock, data, dl_location):  # pragma: no cover
 
         if not data:
             return
@@ -68,7 +69,7 @@ class DataHandler_Client:
         struct_to_send = struct.pack("<Q", filesize)
         return file_path, filename, filesize, struct_to_send
 
-    def client_download(self, sock, dl_location):
+    def client_download(self, sock, dl_location):  # pragma: no cover
         filename = _f.get_file_name()
         sock.sendall(filename.encode())
         filesize = Shared().recieve_file_size(sock)
@@ -85,7 +86,7 @@ class DataHandler_Client:
                 f.close()
             print(f"\nFile '{filename}' has been recieved.")
 
-    def client_upload(self, sock):
+    def client_upload(self, sock):  # pragma: no cover
         try:
             file_path, filename, filesize, struct_test = self.filesize_and_pack_client(
             )
@@ -113,7 +114,7 @@ class DataHandler_Server:
     def __init__(self) -> None:
         pass
 
-    def send_data_to_client(self, conn, clients, data):
+    def send_data_to_client(self, conn, clients, data):  # pragma: no cover
         if data is None:
             return
         elif type(data) == list:
@@ -121,16 +122,18 @@ class DataHandler_Server:
             conn.send(data_str.encode())
         elif data == "error":
             pass
-        elif data.startswith("New"):
+        elif data.startswith("\nNew"):
             for conn in clients:
                 conn.send("broadcast".encode())
                 time.sleep(1)
                 conn.send(data.encode())
-
+        elif data.startswith("\nDuplicate"):
+            print(data)
         else:
             conn.send(data.encode())
 
-    def apply_command_server(self, conn, data, username, DATA_FOLDER):
+    def apply_command_server(self, conn, data, username,
+                             DATA_FOLDER):  # pragma: no cover
         if data == "files":
             print(f"\nRecieved command 'files' from: {username}.")
             conn.sendall("files".encode())
@@ -170,7 +173,7 @@ class DataHandler_Server:
         struct_to_send = struct.pack("<Q", filesize)
         return filesize, struct_to_send
 
-    def server_download(self, conn, username, DATA_FOLDER):
+    def server_download(self, conn, username, DATA_FOLDER):  # pragma: no cover
         files = _f.files_on_serv()
         filename = conn.recv(1024).decode()
         if filename == " ":
@@ -191,7 +194,7 @@ class DataHandler_Server:
             )
             return self.broadcast_new_file(username, filename, files)
 
-    def server_upload(self, conn, DATA_FOLDER):
+    def server_upload(self, conn, DATA_FOLDER):  # pragma: no cover
         try:
             conn.sendall("download".encode())
             filename = conn.recv(1024).decode()
@@ -221,7 +224,7 @@ class DataHandler_Server:
             print("Broadcasting the server got a new file.")
             return f"\nNew file '{filename}' uploaded by user '{username}'"
         else:
-            print("\nDuplicate file. Not broadcasting.")
+            return "\nDuplicate file. Not broadcasting."
 
 
 class Shared:
@@ -236,7 +239,7 @@ class Shared:
         stream = bytes()
         return fmt, expected_bytes, recieved_bytes, stream
 
-    def recieve_file_size(self, conn):
+    def recieve_file_size(self, conn):  # pragma: no cover
         fmt, expected_bytes, recieved_bytes, stream = self.get_bytes()
         while recieved_bytes < expected_bytes:
             chunk = conn.recv(expected_bytes - recieved_bytes)
@@ -248,7 +251,7 @@ class Shared:
                 filesize = struct.unpack(fmt, stream)[0]
                 return filesize
 
-    def progress_bar(self, sock, filesize, progress, f):
+    def progress_bar(self, sock, filesize, progress, f):  # pragma: no cover
         recieved_bytes = 0
         while recieved_bytes < filesize:
             chunk = sock.recv(1024)

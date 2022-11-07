@@ -50,8 +50,11 @@ class Server(threading.Thread):
                 print(
                     f"User: {self.username} running on thread {threading.active_count() - 1} disconnected.\n"
                 )
-                self.clients.remove(self.conn)
-                break
+                try:
+                    self.clients.remove(self.conn)
+                    break
+                except ValueError:
+                    break
 
 
 def main():

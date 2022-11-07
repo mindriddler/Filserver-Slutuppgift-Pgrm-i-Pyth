@@ -37,7 +37,6 @@ class Client(threading.Thread):
         threading.Thread(target=DataHandler_Client().send_command_to_server,
                          args=(
                              self.sock,
-                             self.stop,
                              self.menu,
                              self.operation_system,
                          )).start()
@@ -57,6 +56,8 @@ class Client(threading.Thread):
                     )
             except ConnectionAbortedError:
                 print("You have disconnected from the server.")
+            except OSError:
+                break
 
 
 def main():

@@ -82,3 +82,12 @@ def test_broadcast():
         filename="test_file.txt",
         curr_files=[],
     ) == "\nNew file 'test_file.txt' uploaded by user 'Test_user'"
+
+
+def test_broadcast_duplicate_file():
+    class_init = DataHandler_Server()
+    assert class_init.broadcast_new_file(
+        username="Test_user",
+        filename="file_for_duplicate_broadcast_test.txt",
+        curr_files=["file_for_duplicate_broadcast_test.txt"
+                    ]) == "\nDuplicate file. Not broadcasting."
