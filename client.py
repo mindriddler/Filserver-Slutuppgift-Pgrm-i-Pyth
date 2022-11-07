@@ -7,7 +7,6 @@ from _datahandler import DataHandler
 
 
 class Client(threading.Thread):
-
     def __init__(self, sock, stop):
         threading.Thread.__init__(self)
         self.sock = sock
@@ -15,18 +14,20 @@ class Client(threading.Thread):
         self.username = input("Enter your username: ")
         self.operation_system = platform.platform()
         self.dl_location = input("Set your download location: ")
-        self.menu = (f"\nUsername: {self.username}\n"
-                     f"Download location: {self.dl_location}\n"
-                     "\nCOMMAND   | DESCRIPTION\n"
-                     "---------------------------\n"
-                     "remove    | Removes a file\n"
-                     "download  | Upload a file\n"
-                     "upload    | Download a file\n"
-                     "file_size | Check file size\n"
-                     "files     | Check available files\n\n"
-                     "dl_local  | Update dl location\n"
-                     "dc        | Disconnect\n\n"
-                     "Enter command: ")
+        self.menu = (
+            f"\nUsername: {self.username}\n"
+            f"Download location: {self.dl_location}\n"
+            "\nCOMMAND   | DESCRIPTION\n"
+            "---------------------------\n"
+            "remove    | Removes a file\n"
+            "download  | Upload a file\n"
+            "upload    | Download a file\n"
+            "file_size | Check file size\n"
+            "files     | Check available files\n\n"
+            "dl_local  | Update dl location\n"
+            "dc        | Disconnect\n\n"
+            "Enter command: "
+        )
 
     def run(self):
         self.sock.sendall(self.username.encode())
@@ -35,8 +36,9 @@ class Client(threading.Thread):
         else:
             os.system("clear")
         print(self.sock.recv(1024).decode())
-        threading.Thread(target=self.send_command_to_server,
-                         args=(self.sock, self.stop, self.menu)).start()
+        threading.Thread(
+            target=self.send_command_to_server, args=(self.sock, self.stop, self.menu)
+        ).start()
         while not self.stop.is_set():
             try:
                 data = self.sock.recv(1024).decode()
@@ -74,9 +76,11 @@ class Client(threading.Thread):
                 elif command == "download":
                     sock.sendall(command.encode())
                 else:
-                    input("You didn't enter a command.\n"
-                          "Try again.\n"
-                          "Press any key to continue.")
+                    input(
+                        "You didn't enter a command.\n"
+                        "Try again.\n"
+                        "Press any key to continue."
+                    )
                     if "Windows" in self.operation_system:
                         os.system("cls")
                     else:

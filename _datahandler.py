@@ -33,11 +33,8 @@ class DataHandler:
         stream = bytes()
         while recieved_bytes < expected_bytes:
             chunk = conn.recv(expected_bytes - recieved_bytes)
-            if chunk == " ":
-                raise FileNotFoundError
-            else:
-                stream += chunk
-                recieved_bytes += len(chunk)
+            stream += chunk
+            recieved_bytes += len(chunk)
             filesize = struct.unpack(fmt, stream)[0]
             return filesize
 
@@ -68,13 +65,11 @@ class DataHandler:
             print("User made some mistake. Aborting upload.")
         else:
             filesize = self.recieve_file_size(conn)
-            progress = tqdm.tqdm(
-                range(filesize),
-                f"Recieving {filename} from user: {username}",
-                unit="B",
-                unit_scale=True,
-                unit_divisor=1024,
-            )
+            progress = tqdm.tqdm(range(filesize),
+                                 f"Recieving {filename} from user: {username}",
+                                 unit="B",
+                                 unit_scale=True,
+                                 unit_divisor=1024)
             with open(f"{DATA_FOLDER}{filename}", "wb") as f:
                 recieved_bytes = 0
                 while recieved_bytes < filesize:
@@ -87,8 +82,9 @@ class DataHandler:
             print(
                 f"\nFile '{filename}' has been recieved from user: {username}."
             )
-            self.broadcast_new_file(conn, username, clients, filename,
-                                    curr_files)
+            broadcast_var = self.broadcast_new_file(conn, username, clients,
+                                                    filename, curr_files)
+            return broadcast_var
 
     def upload_to_client(self, conn, DATA_FOLDER):
         try:
@@ -121,13 +117,11 @@ class DataHandler:
             sock.sendall(filename.encode())
             struct_test = struct.pack("<Q", filesize)
             sock.sendall(struct_test)
-            progress = tqdm.tqdm(
-                range(filesize),
-                f"Uploading {filename}",
-                unit="B",
-                unit_scale=True,
-                unit_divisor=1024,
-            )
+            progress = tqdm.tqdm(range(filesize),
+                                 f"Uploading {filename}",
+                                 unit="B",
+                                 unit_scale=True,
+                                 unit_divisor=1024)
             with open(file_path, "rb") as f:
                 while read_bytes := f.read(1024):
                     sock.sendall(read_bytes)
@@ -144,9 +138,6 @@ class DataHandler:
 
         if filename not in curr_files:
             print("Broadcasting the server got a new file.")
-            for conn in clients:
-                conn.send("broadcast".encode())
-                time.sleep(2)
-                conn.send(new_file_uploaded.encode())
+            return new_file_uploaded
         else:
             print("\nDuplicate file. Not broadcasting.")

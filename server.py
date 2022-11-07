@@ -1,5 +1,6 @@
 import socket
 import threading
+import time
 import _functions as _f
 import platform
 
@@ -38,7 +39,7 @@ class Server(threading.Thread):
                 else:
                     returned = _f.apply_command(self.conn, data, self.username,
                                                 self.DATA_FOLDER, self.clients)
-                    self.send_to_client(self.conn, returned)
+                    self.send_to_client(self.conn, self.clients, returned)
             except OSError:
                 print(
                     f"User: {self.username} running on thread {threading.active_count() - 1} disconnected.\n"
@@ -46,10 +47,15 @@ class Server(threading.Thread):
                 self.clients.remove(self.conn)
                 break
 
-    def send_to_client(self, conn, data):
+    def send_to_client(self, conn, clients, data):
         if type(data) == list:
             data_str = str(data)
             conn.send(data_str.encode())
+        elif "uploaded" in data:
+            for conn in clients:
+                conn.send("broadcast".encode())
+                time.sleep(1)
+                conn.send(data.encode())
         elif data is None:
             pass
         else:

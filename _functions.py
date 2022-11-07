@@ -25,7 +25,8 @@ def apply_command(conn, data, username, DATA_FOLDER,
     elif data == "upload":
         conn.sendall("upload".encode())
         print(f"\nRecieved command 'upload' from user: {username}.")
-        dh().server_recieve(conn, username, DATA_FOLDER, clients)
+        result = dh().server_recieve(conn, username, DATA_FOLDER, clients)
+        return result
     elif data == "file_size":
         try:
             file = conn.recv(1024).decode()
