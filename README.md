@@ -42,7 +42,7 @@ py -m venv .venv
 .\.venv\Scripts\Activate.ps1
 ```
 
-### Install requirements.txt 
+## Install requirements.txt 
 
 ```
 pip install -r requirements.txt
