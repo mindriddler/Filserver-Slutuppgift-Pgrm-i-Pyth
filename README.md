@@ -14,7 +14,7 @@ For how to install python 3.10, see instructions at the bottom
 
 ## Create and activate a virtual environment
 
-Navigate to where you cloned the repository and run the commands below in your terminal of choice
+Navigate to the folder where you cloned the repository and run the commands below in your terminal of choice
 
 #### Linux / OSX
 ```bash
@@ -50,6 +50,7 @@ pip install -r requirements.txt
 ---
 ## How to run the program
 1. #### Start the server
+  Navigate to the folder where you cloned the repository and run the commands below in your terminal of choice
 ```python
 python server.py # can also be python3 or py, depending on the OS
 ```
