@@ -14,6 +14,8 @@ For how to install python 3.10, see instructions at the bottom
 
 ### Create and activate a virtual environment
 
+Navigate to where you cloned the repository and run the commands below
+
 #### Linux / OSX
 ```bash
 python -m venv .venv # can also be python3
