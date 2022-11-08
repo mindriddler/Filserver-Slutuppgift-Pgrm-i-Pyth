@@ -3,7 +3,7 @@ from os import listdir
 from unittest import mock
 import builtins
 from _datahandler import DataHandler_Client, DataHandler_Server, Shared
-
+import _functions
 # DATA_FOLDER = "Data/"  # Linux, uncomment to use
 DATA_FOLDER = "Data\\"  # Windows, uncomment to use
 
@@ -62,12 +62,11 @@ def test_filesize_and_pack_server():
         DATA_FOLDER, "Kiara.jpg") == (3678528, b'@!8\x00\x00\x00\x00\x00')
 
 
-# def test_filesize_and_pack_client():
-#     class_init = DataHandler_Client()
-#     with mock.patch.object(builtins, "input", lambda _: "Data\\"):
-#         assert class_init.filesize_and_pack_client == (
-#             'Data\\Kiara.jpg', 'Kiara.jpg', 3678528,
-#             b'@!8\x00\x00\x00\x00\x00')
+@mock.patch.object(_functions, "get_file_path", return_value="Data\\Kiara.jpg")
+def test_filesize_and_pack_client(mocked_file_path):
+    class_init = DataHandler_Client()
+    assert class_init.filesize_and_pack_client() == (
+        'Data\\Kiara.jpg', 'Kiara.jpg', 3678528, b'@!8\x00\x00\x00\x00\x00')
 
 
 def test_get_bytes():
