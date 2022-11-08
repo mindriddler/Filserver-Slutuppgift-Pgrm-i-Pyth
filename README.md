@@ -14,14 +14,14 @@ For how to install python 3.10, see instructions at the bottom
 
 ### Create and activate a virtual environment
 
-Linux / OSX
+#### Linux / OSX
 ```bash
 python -m venv .venv # can also be python3
 
 source .venv/bin/activate
 ```
 
-Windows - cmd.exe
+#### Windows - cmd.exe
 
 ```
 python -m venv .venv
@@ -29,7 +29,7 @@ python -m venv .venv
 .venv\Scripts\activate.bat
 ```
 
-Windows - PowerShell
+#### Windows - PowerShell
 
 ```powershell
 # On Microsoft Windows, it may be required to enable the Activate.ps1 script by setting the execution policy for the user. You can do this by issuing the following PowerShell command:
