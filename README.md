@@ -49,34 +49,19 @@ pip install -r requirements.txt
 ## How to run the program
 1. #### Start the server
 ```python
-python server.py
+python server.py # can also be python3 or py, depending on the OS
 ```
 2. #### Run as many clients as you want
 ```python
-python client.py
+python client.py # can also be python3 or py, depending on the OS
 ```
 
-As a client you can run the following commands;
-- #### files 
-```
-	will return all files on the server
-```
-- #### file_size
-```
-	will return the file size of a specified file
-```
-- #### remove
-```
-	will remove a specific file from the server
-```
-- #### upload
- ```
-	will upload a specified file from client
- ```
-- #### download
-```
-	will download a specified file to the client
-```
+##### As a client you can run the following commands;
+-  files 
+-  file_size
+-  remove
+-  upload
+-  download
 
 ## How to install python
 
