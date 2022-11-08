@@ -12,7 +12,7 @@ This is my version of the final assignment for the course "Programmering i Pytho
 To use the program you will need python 3.10 or higher installed on your computer
 For how to install python 3.10, see instructions at the bottom
 
-### Create and activate a virtual environment
+## Create and activate a virtual environment
 
 Navigate to where you cloned the repository and run the commands below in your terminal of choice
 
