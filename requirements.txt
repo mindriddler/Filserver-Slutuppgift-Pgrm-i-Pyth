@@ -1,5 +1,6 @@
-yapf
 coverage
 flake8
 tox
 pytest
+tqdm
+yapf
