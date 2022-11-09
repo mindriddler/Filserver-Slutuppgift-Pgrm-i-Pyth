@@ -79,9 +79,9 @@ tox
 ```
 This will give you a good visual overview of how many tests made and how well they cover the code.
 
-I have not run any tests on socket function, seeing as this was not part of my assignment and also are not unit tests.
+I have not run any tests on socket function, seeing as this was not part of my assignment and also are not unit tests. And they are also not covered in the coverage readout.
 
-If you want a lesser but quicker was to test you can run command below from the same folder.
+If you want a lesser but quicker way to test you can run command below from the same folder.
 ```python
 pytest
 ```
