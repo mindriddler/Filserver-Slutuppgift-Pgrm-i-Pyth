@@ -71,6 +71,21 @@ python client.py # can also be python3 or py, depending on the OS
 -  dl_local   | Update your download location
 -  dc         | Disconnect from server
 ```
+## How to run tests
+
+Navigate to the folder where you cloned the repository and run the commands below in your terminal of choice
+```python
+tox
+```
+This will give you a good visual overview of how many tests made and how well they cover the code.
+
+I have not run any tests on socket function, seeing as this was not part of my assignment and also are not unit tests.
+
+If you want a lesser but quicker was to test you can run command below from the same folder.
+```python
+pytest
+```
+
 ## How to install python
 
 ## **Windows** 
