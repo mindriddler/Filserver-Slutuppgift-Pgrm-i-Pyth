@@ -36,16 +36,20 @@ class Server(threading.Thread):
                     break
                 else:
                     returned = DataHandler_Server().apply_command_server(
+                        self.sock,
                         self.conn,
                         data,
                         self.username,
                         self.DATA_FOLDER,
                     )
-                    DataHandler_Server().send_data_to_client(
-                        self.conn,
-                        self.clients,
-                        returned,
-                    )
+                    if returned is False:
+                        self.running = False
+                    else:
+                        DataHandler_Server().send_data_to_client(
+                            self.conn,
+                            self.clients,
+                            returned,
+                        )
             except OSError:
                 print(
                     f"User: {self.username} running on thread {threading.active_count() - 1} disconnected.\n"
@@ -67,18 +71,21 @@ def main():
     else:
         DATA_FOLDER = "Data/"
         print("UNIX detected. Setting data folder to 'Data/'")
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
-        sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        sock.bind((SERVER, PORT))
-        print("Socket bound to port %s" % (PORT))
-        sock.listen(5)
-        print("Listening for connections.")
-        clients = []
-        while True:
-            conn, addr = sock.accept()
-            clients.append(conn)
-            print("Got connection from", addr)
-            Server(conn, sock, addr, clients, DATA_FOLDER).start()
+    try:
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+            sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            sock.bind((SERVER, PORT))
+            print("Socket bound to port %s" % (PORT))
+            sock.listen(5)
+            print("Listening for connections.")
+            clients = []
+            while True:
+                conn, addr = sock.accept()
+                clients.append(conn)
+                print("Got connection from", addr)
+                Server(conn, sock, addr, clients, DATA_FOLDER).start()
+    except OSError:
+        pass
 
 
 if __name__ == "__main__":

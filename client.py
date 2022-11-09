@@ -18,7 +18,7 @@ class Client(threading.Thread):
         self.sock.sendall(self.username.encode())
         self.dl_location = _functions.check_user_write_rights(
             self.dl_location, self.operating_system)
-        _functions.clear_terminal()
+        _functions.clear_terminal(self.operating_system)
         print(self.sock.recv(1024).decode())
         threading.Thread(target=DataHandler_Client().send_command_to_server,
                          args=(

@@ -63,13 +63,14 @@ python client.py # can also be python3 or py, depending on the OS
 
 ##### As a client you can run the following commands;
 ```
--  files      | Show you all available files on the server
--  file_size  | Show you file size of a specified file
--  remove     | Removes a specified file
--  upload     | Upload a speficied file to the server
--  download   | Download specified file to your download location
--  dl_local   | Update your download location
--  dc         | Disconnect from server
+- files      | Show you all available files on the server
+- file_size  | Show you file size of a specified file
+- remove     | Removes a specified file
+- upload     | Upload a speficied file to the server
+- download   | Download specified file to your download location
+- dl_local   | Update your download location
+- dc         | Disconnect from server
+- s_close    | Turns off the server
 ```
 ## How to run tests
 

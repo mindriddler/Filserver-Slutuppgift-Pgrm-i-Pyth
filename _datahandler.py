@@ -26,7 +26,8 @@ class DataHandler_Client:
                                 "file_size | Check file size\n"
                                 "files     | Check available files\n\n"
                                 "dl_local  | Update dl location\n"
-                                "dc        | Disconnect\n\n"
+                                "dc        | Disconnect\n"
+                                "s_close   | Turns off the server\n\n"
                                 "Enter command: ")
                 if command == "dc":
                     sock.sendall(command.encode())
@@ -37,16 +38,18 @@ class DataHandler_Client:
                     dl_location = _f.check_user_write_rights(
                         input("Enter new download location: "),
                         operating_system)
-                elif command == "upload":
+                elif command == "s_close":
+                    print("Sending shutdown command to server.")
+                    sock.sendall(command.encode())
+                    sock.close()
+                    running = False
+                    exit()
+                elif command == "upload" or command == "files" or command == "download":
                     sock.sendall(command.encode())
                 elif command == "file_size" or command == "remove":
                     sock.sendall(command.encode())
                     filename = input("Enter filename: ")
                     sock.sendall(filename.encode())
-                elif command == "files":
-                    sock.sendall(command.encode())
-                elif command == "download":
-                    sock.sendall(command.encode())
                 else:
                     input("You didn't enter a command.\n"
                           "Try again.\n"
@@ -117,7 +120,6 @@ class DataHandler_Client:
             return "Transfer complete"
         except FileNotFoundError:
             print("\nThe file does not exist.")
-            input("Press any key to continue")
             sock.send(" ".encode())
 
 
@@ -144,7 +146,7 @@ class DataHandler_Server:
         else:
             conn.send(data.encode())
 
-    def apply_command_server(self, conn, data, username,
+    def apply_command_server(self, sock, conn, data, username,
                              DATA_FOLDER):  # pragma: no cover
         if data == "files":
             print(f"\nRecieved command 'files' from: {username}.")
@@ -153,6 +155,12 @@ class DataHandler_Server:
             return all_files
         elif data == "dc":
             conn.close()
+        elif data == "s_close":
+            print("Recieved command 's_close'. Shutting down the server.")
+            # conn.close()
+            sock.close()
+            running = False
+            return running
         elif data == "remove":
             file = conn.recv(1024).decode()
             conn.sendall("remove".encode())
