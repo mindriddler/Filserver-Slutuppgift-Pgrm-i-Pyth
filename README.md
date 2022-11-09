@@ -9,12 +9,13 @@ This is my version of the final assignment for the course "Programmering i Pytho
 ---
 # **Setup**
 
-To use the program you will need python 3.10 or higher installed on your computer
-For how to install python 3.10, see instructions at the bottom
+To use the program you will need python 3.10 or higher installed on your computer.
+
+For instructions on how to install python 3.10, see further down below.
 
 ## Create and activate a virtual environment
 
-Navigate to the folder where you cloned the repository and run the commands below in your terminal of choice
+Navigate to the folder where you cloned the repository and run the commands below in your terminal of choice.
 
 #### Linux / OSX
 ```bash
@@ -52,7 +53,7 @@ pip install -r requirements.txt
 
 ##### The program is made to be run over a local network, but may be configured manually to work over the internet if wanted.
 1. #### Start the server
-  Navigate to the folder where you cloned the repository and run the commands below in your terminal of choice
+  Navigate to the folder where you cloned the repository and run the commands below in your terminal of choice.
 ```python
 python server.py # can also be python3 or py, depending on the OS
 ```
@@ -74,7 +75,7 @@ python client.py # can also be python3 or py, depending on the OS
 ```
 ## How to run tests
 
-Navigate to the folder where you cloned the repository and run the commands below in your terminal of choice
+Navigate to the folder where you cloned the repository and run the command below in your terminal of choice.
 ```python
 tox
 ```
