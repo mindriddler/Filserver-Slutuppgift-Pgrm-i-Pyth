@@ -14,6 +14,7 @@ class DataHandler_Client:
                                username):  # pragma: no cover
         running = True
         while running:
+            # _f.clear_terminal(operating_system)
             time.sleep(0.05)
             try:
                 command = input(f"\nUsername: {username}\n"
@@ -34,7 +35,10 @@ class DataHandler_Client:
                     running = False
                     exit()
                 elif command == "dl_local":
-                    dl_location = input("New download location: ")
+                    dl_location = _f.check_user_write_rights(
+                        input("Enter new download location: "),
+                        operating_system,
+                    )
                 elif command == "upload":
                     sock.sendall(command.encode())
                 elif command == "file_size" or command == "remove":
@@ -49,10 +53,7 @@ class DataHandler_Client:
                     input("You didn't enter a command.\n"
                           "Try again.\n"
                           "Press any key to continue.")
-                    if "Windows" in operating_system:
-                        os.system("cls")
-                    else:
-                        os.system("clear")
+                    _f.clear_terminal(operating_system)
             except OSError as e:
                 print(e)
                 break
@@ -62,7 +63,8 @@ class DataHandler_Client:
             except ValueError:
                 break
 
-    def recieve_data(self, sock, data, dl_location):  # pragma: no cover
+    def recieve_data(self, sock, data, dl_location,
+                     operating_system):  # pragma: no cover
 
         if not data:
             return
@@ -74,9 +76,10 @@ class DataHandler_Client:
             data = sock.recv(1024).decode()
             print(data)
         else:
+            _f.clear_terminal(operating_system)
             data = sock.recv(1024).decode()
             print(data)
-            input("Press any key to continue")
+            input("Press any key to continue.")
 
     def filesize_and_pack_client(self):
         file_path = _f.get_file_path()
@@ -123,6 +126,7 @@ class DataHandler_Client:
             return "Transfer complete"
         except FileNotFoundError:
             print("\nThe file does not exist.")
+            input("Press any key to continue")
             sock.send(" ".encode())
 
 
@@ -261,6 +265,10 @@ class Shared:
         while recieved_bytes < expected_bytes:
             chunk = conn.recv(expected_bytes - recieved_bytes)
             if chunk == b' ':
+                print(
+                    "\nYou made a mistake. Most likely you entered a filename for a file"
+                    " that doesnt exist on the server.Therefore is download aborted"
+                    "\nEnter new command: ")
                 return
             else:
                 stream += chunk

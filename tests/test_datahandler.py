@@ -2,15 +2,18 @@ from unittest import mock
 import _functions
 from _datahandler import DataHandler_Client, DataHandler_Server, Shared
 
-# DATA_FOLDER = "Data/"  # Linux, uncomment to use
-DATA_FOLDER = "Data\\"  # Windows, uncomment to use
+DATA_FOLDER = "Data/"  # Linux, uncomment to use
+# DATA_FOLDER = "Data\\"  # Windows, uncomment to use
 
 
-@mock.patch.object(_functions, "get_file_path", return_value="Data\\Kiara.jpg")
+@mock.patch.object(_functions,
+                   "get_file_path",
+                   return_value=f"{DATA_FOLDER}Kiara.jpg")
 def test_filesize_and_pack_client(mocked_file_path):
     class_init = DataHandler_Client()
     assert class_init.filesize_and_pack_client() == (
-        'Data\\Kiara.jpg', 'Kiara.jpg', 3678528, b'@!8\x00\x00\x00\x00\x00')
+        f"{DATA_FOLDER}Kiara.jpg", 'Kiara.jpg', 3678528,
+        b'@!8\x00\x00\x00\x00\x00')
 
 
 def test_filesize_and_pack_server():

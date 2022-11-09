@@ -40,11 +40,9 @@ class Client(threading.Thread):
                     print("You have disconnected from the server.")
                     break
                 else:
-                    DataHandler_Client().recieve_data(
-                        self.sock,
-                        data,
-                        self.dl_location,
-                    )
+                    DataHandler_Client().recieve_data(self.sock, data,
+                                                      self.dl_location,
+                                                      self.operating_system)
             except ConnectionAbortedError:
                 print("You have disconnected from the server.")
             except OSError:

@@ -48,8 +48,13 @@ def check_os():
     if "Windows" in operating_system:
         operating_system = "Windows"
         return operating_system
+    elif "Linux" in operating_system:
+        operating_system = "Linux"
+        return operating_system
+    elif "Darwin" in operating_system:
+        operating_system = "OSX"
+        return operating_system
     else:
-        operating_system = "Unix"
         return operating_system
 
 
@@ -64,7 +69,8 @@ def check_user_write_rights(dl_location, operating_system):
                 write_right = True
             except Exception:
                 dl_location = input(
-                    "You do not have write rights to this folder.\n"
+                    "\nYou do not have write rights to this folder.\n"
+                    "Or the folder does not exist.\n"
                     "Enter a new download location: ")
         else:
             try:
@@ -72,7 +78,8 @@ def check_user_write_rights(dl_location, operating_system):
                 write_right = True
             except Exception:
                 dl_location = input(
-                    "You do not have write rights to this folder.\n"
+                    "\nYou do not have write rights to this folder.\n"
+                    "Or the folder does not exist.\n"
                     "Enter a new download location: ")
 
     os.remove(f"{dl_location}testfile.txt")
@@ -93,24 +100,8 @@ def check_backslash(dl_location, operating_system):
             return dl_location
 
 
-# def check_if_dir_exist(dl_location, operating_system):
-#     while True:
-#         if not os.path.exists(dl_location):
-#             choice = input(
-#                 "The folder does not exist.\n"
-#                 "Do you want me to create it for you? [Yes or no]: ").lower()
-#             if choice == "yes":
-#                 os.mkdir(dl_location)
-#                 if operating_system == "Windows":
-#                     return f"{dl_location}\\"
-#                 else:
-#                     return f"{dl_location}/"
-#             elif choice == "no":
-#                 dl_location = input("Enter a new download location: ")
-#                 if operating_system == "Windows" and dl_location.endswith(
-#                         "\\") is False:
-#                     return f"{dl_location}\\"
-#                 elif dl_location.endswith("/") is False:
-#                     return f"{dl_location}/"
-#                 else:
-#                     return dl_location
+def clear_terminal(operating_system):  # pragma: no cover
+    if operating_system == "Windows":
+        os.system("cls")
+    else:
+        os.system("clear")
