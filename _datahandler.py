@@ -14,7 +14,6 @@ class DataHandler_Client:
                                username):  # pragma: no cover
         running = True
         while running:
-            # _f.clear_terminal(operating_system)
             time.sleep(0.05)
             try:
                 command = input(f"\nUsername: {username}\n"
@@ -37,8 +36,7 @@ class DataHandler_Client:
                 elif command == "dl_local":
                     dl_location = _f.check_user_write_rights(
                         input("Enter new download location: "),
-                        operating_system,
-                    )
+                        operating_system)
                 elif command == "upload":
                     sock.sendall(command.encode())
                 elif command == "file_size" or command == "remove":
@@ -54,18 +52,11 @@ class DataHandler_Client:
                           "Try again.\n"
                           "Press any key to continue.")
                     _f.clear_terminal(operating_system)
-            except OSError as e:
-                print(e)
-                break
-            except KeyboardInterrupt:
-                print("Keyboard interrupt")
-                break
-            except ValueError:
+            except (OSError, KeyboardInterrupt, ValueError):
                 break
 
     def recieve_data(self, sock, data, dl_location,
                      operating_system):  # pragma: no cover
-
         if not data:
             return
         elif data == "download":
