@@ -1,6 +1,6 @@
 import socket
 import threading
-import platform
+import _functions
 from _datahandler import DataHandler_Server
 
 
@@ -60,13 +60,13 @@ class Server(threading.Thread):
 def main():
     SERVER = "127.0.0.1"
     PORT = 44554
-    operation_system = platform.platform()
-    if "Windows" in operation_system:
+    operation_system = _functions.check_os()
+    if operation_system == "Windows":
         DATA_FOLDER = "Data\\"
-        print("Server is running on a Windows system")
-    elif "Linux" or "Mac" in operation_system:
+        print("Windows detected. Setting data folder to 'Data\\'")
+    else:
         DATA_FOLDER = "Data/"
-        print("Server is running on a Linux system")
+        print("UNIX detected. Setting data folder to 'Data/'")
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         sock.bind((SERVER, PORT))

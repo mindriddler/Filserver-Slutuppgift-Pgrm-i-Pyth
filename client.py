@@ -1,8 +1,8 @@
 import threading
 import socket
 import os
-import platform
 from _datahandler import DataHandler_Client
+import _functions
 
 
 class Client(threading.Thread):
@@ -12,24 +12,14 @@ class Client(threading.Thread):
         self.sock = sock
         self.stop = stop
         self.username = input("Enter your username: ")
-        self.operation_system = platform.platform()
+        self.operating_system = _functions.check_os()
         self.dl_location = input("Set your download location: ")
-        self.menu = (f"\nUsername: {self.username}\n"
-                     f"Download location: {self.dl_location}\n"
-                     "\nCOMMAND   | DESCRIPTION\n"
-                     "---------------------------\n"
-                     "remove    | Removes a file\n"
-                     "download  | Upload a file\n"
-                     "upload    | Download a file\n"
-                     "file_size | Check file size\n"
-                     "files     | Check available files\n\n"
-                     "dl_local  | Update dl location\n"
-                     "dc        | Disconnect\n\n"
-                     "Enter command: ")
 
     def run(self):
         self.sock.sendall(self.username.encode())
-        if "Windows" in self.operation_system:
+        self.dl_location = _functions.check_user_write_rights(
+            self.dl_location, self.operating_system)
+        if self.operating_system == "Windows":
             os.system("cls")
         else:
             os.system("clear")
@@ -37,8 +27,9 @@ class Client(threading.Thread):
         threading.Thread(target=DataHandler_Client().send_command_to_server,
                          args=(
                              self.sock,
-                             self.menu,
-                             self.operation_system,
+                             self.operating_system,
+                             self.dl_location,
+                             self.username,
                          )).start()
         while not self.stop.is_set():
             try:

@@ -10,20 +10,31 @@ class DataHandler_Client:
     def __init__(self) -> None:
         pass
 
-    def send_command_to_server(self, sock, menu,
-                               operation_system):  # pragma: no cover
+    def send_command_to_server(self, sock, operating_system, dl_location,
+                               username):  # pragma: no cover
         running = True
         while running:
+            time.sleep(0.05)
             try:
-                time.sleep(0.05)
-                command = input(menu)
+                command = input(f"\nUsername: {username}\n"
+                                f"Download location: {dl_location}\n"
+                                "\nCOMMAND   | DESCRIPTION\n"
+                                "---------------------------\n"
+                                "remove    | Removes a file\n"
+                                "download  | Download a file\n"
+                                "upload    | Upload a file\n"
+                                "file_size | Check file size\n"
+                                "files     | Check available files\n\n"
+                                "dl_local  | Update dl location\n"
+                                "dc        | Disconnect\n\n"
+                                "Enter command: ")
                 if command == "dc":
                     sock.sendall(command.encode())
                     sock.close()
                     running = False
                     exit()
                 elif command == "dl_local":
-                    self.dl_location = input("New download location: ")
+                    dl_location = input("New download location: ")
                 elif command == "upload":
                     sock.sendall(command.encode())
                 elif command == "file_size" or command == "remove":
@@ -38,12 +49,17 @@ class DataHandler_Client:
                     input("You didn't enter a command.\n"
                           "Try again.\n"
                           "Press any key to continue.")
-                    if "Windows" in operation_system:
+                    if "Windows" in operating_system:
                         os.system("cls")
                     else:
                         os.system("clear")
             except OSError as e:
                 print(e)
+                break
+            except KeyboardInterrupt:
+                print("Keyboard interrupt")
+                break
+            except ValueError:
                 break
 
     def recieve_data(self, sock, data, dl_location):  # pragma: no cover
@@ -84,6 +100,7 @@ class DataHandler_Client:
             with open(f"{dl_location}{filename}", "wb") as f:
                 Shared().progress_bar(sock, filesize, progress, f)
                 f.close()
+            time.sleep(1)
             print(f"\nFile '{filename}' has been recieved.")
 
     def client_upload(self, sock):  # pragma: no cover
