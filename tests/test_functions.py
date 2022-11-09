@@ -59,5 +59,4 @@ def test_rm_file():
 
 @mock.patch("builtins.input", return_value="test.txt")
 def test_get_file_name(mock_input):
-    # with mock.patch.object(builtins, "input", lambda _: "test.txt"):
     assert _functions.get_file_name() == "test.txt"

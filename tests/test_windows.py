@@ -22,10 +22,6 @@ def test_check_user_write_rights_False_windows(mocked_input, mocked_remove,
         operating_system="Windows") == f"C:\\Users\\{username}\\Desktop\\"
 
 
-#     # out, err = capfd.readouterr()
-#     # assert out == ""
-
-
 def test_check_backslash_windows():
     assert _functions.check_backslash(
         f"C:\\Users\\{username}\\Desktop",
